@@ -1,4 +1,117 @@
----
+---import React, { useState } from "react";
+import { View, Text, FlatList, TouchableOpacity, Share } from "react-native";
+import { useEffect } from "react";
+
+const TripPlannerApp = () => {
+  const [itinerary, setItinerary] = useState([]);
+
+  const popularMooringSites = [
+    "The Bight, Norman Island",
+    "Great Harbour, Jost Van Dyke",
+    "Mosquito Bay’s Bio-luminescent Lagoon, Vieques",
+    "Mosquito Bay Beach, Vieques",
+    "Playa Tamarindo Beach, Culebra",
+    "Bahia Flamenco Beach, Culebra",
+    // More sites...
+  ];
+
+  const addDay = () => {
+    setItinerary([...itinerary, { id: itinerary.length + 1, events: [] }]);
+  };
+
+  const addEvent = (dayId, eventType) => {
+    setItinerary(
+      itinerary.map((day) =>
+        day.id === dayId
+          ? { ...day, events: [...day.events, eventType] }
+          : day
+      )
+    );
+  };
+
+  // Function to create the shareable text for itinerary
+  const createShareableText = () => {
+    let itineraryText = "My Trip Itinerary:\n\n";
+    itinerary.forEach((day) => {
+      itineraryText += `Day ${day.id}:\n`;
+      day.events.forEach((event) => {
+        itineraryText += `  - ${event}\n`;
+      });
+      itineraryText += "\n";
+    });
+
+    itineraryText += "Popular Mooring Sites:\n";
+    popularMooringSites.forEach((site) => {
+      itineraryText += `  - ${site}\n`;
+    });
+
+    return itineraryText;
+  };
+
+  // Function to share the itinerary
+  const shareItinerary = async () => {
+    try {
+      const itineraryText = createShareableText();
+      await Share.share({
+        message: itineraryText,
+      });
+    } catch (error) {
+      console.error("Error sharing itinerary:", error);
+    }
+  };
+
+  return (
+    <View style={{ flex: 1, padding: 20 }}>
+      <Text style={{ fontSize: 24, fontWeight: "bold" }}>Trip Itinerary</Text>
+      <FlatList
+        data={itinerary}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          <View style={{ padding: 10, borderBottomWidth: 1 }}>
+            <Text style={{ fontSize: 18 }}>Day {item.id}</Text>
+            {item.events.map((event, index) => (
+              <Text key={index} style={{ fontSize: 16, marginLeft: 10 }}>
+                - {event}
+              </Text>
+            ))}
+            <TouchableOpacity
+              onPress={() => addEvent(item.id, "Snorkeling")}
+              style={{ backgroundColor: "teal", padding: 5, marginTop: 5 }}
+            >
+              <Text style={{ color: "white", textAlign: "center" }}>Add Snorkeling</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => addEvent(item.id, "Dining")}
+              style={{ backgroundColor: "orange", padding: 5, marginTop: 5 }}
+            >
+              <Text style={{ color: "white", textAlign: "center" }}>Add Dining</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      />
+      <TouchableOpacity
+        onPress={addDay}
+        style={{ backgroundColor: "blue", padding: 10, marginTop: 10 }}
+      >
+        <Text style={{ color: "white", textAlign: "center" }}>Add Day</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        onPress={shareItinerary}
+        style={{
+          backgroundColor: "green",
+          padding: 10,
+          marginTop: 20,
+          alignItems: "center",
+        }}
+      >
+        <Text style={{ color: "white" }}>Share Itinerary</Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+export default TripPlannerApp;
 title: Start developing
 description: Make your first change to an Expo project and see it live on your device.
 hideTOC: true
